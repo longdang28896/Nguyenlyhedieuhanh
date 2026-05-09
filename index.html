@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Nguyên lý Hệ điều hành</title>
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --bg-color: #f4f7f9;
+            --text-main: #212529;
+            --success-bg: #d1e7dd;
+            --success-text: #0f5132;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 { color: var(--primary-color); font-size: 1.5rem; }
+
+        .search-area {
+            position: sticky;
+            top: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            z-index: 1000;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus { border-color: var(--primary-color); }
+
+        .quiz-item {
+            background: white;
+            padding: 18px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 5px solid var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .question { font-weight: 600; margin-bottom: 8px; display: block; }
+
+        .answer {
+            background-color: var(--success-bg);
+            color: var(--success-text);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            display: block;
+        }
+
+        .no-result { text-align: center; color: #6c757d; margin-top: 30px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🖥️ Hệ Điều Hành - Tra cứu nhanh</h1>
+    </header>
+
+    <div class="search-area">
+        <input type="text" id="searchInput" placeholder="Tìm câu hỏi, tên thuật toán, INT..." onkeyup="handleSearch()">
+    </div>
+
+    <div id="quizContainer"></div>
+    <div id="emptyMsg" class="no-result">Không tìm thấy câu hỏi phù hợp.</div>
+</div>
+
+<script>
+    const osData = [
+        {q: "Thành phần nào không phải là thành phần của hệ điều hành?", a: "Chương trình điều khiển thiết bị"},
+        {q: "“Mỗi công việc trong hệ thống thường có thể được thực hiện bằng nhiều cách khác nhau và bằng nhiều công cụ khác nhau”, là nguyên lý nào?", a: "Nguyên lí phủ chức năng"},
+        {q: "Hệ điều hành thực hiện ở chế độ?", a: "Độc quyền"},
+        {q: "Hệ điều hành có tính mở về mặt kiến trúc là hệ điều hành được xây dựng dựa trên nguyên lí nào?", a: "Nguyên lí Macroprocessor"},
+        {q: "“Hệ thống không bao giờ tham chiếu trực tiếp tới đối tượng vật lí”, là nguyên lý nào?", a: "Bảng tham số điều khiển"},
+        {q: "“Hệ điều hành được chia thành nhiều phần, các thành phần có thể ghép nối với nhau thông qua đầu vào và đầu ra”, là nguyên lý nào?", a: "Nguyên lí module"},
+        {q: "Chức năng của Hệ điều hành?", a: "Quản lí tài nguyên và giúp cho người sử dụng khai thác chức năng của phần cứng máy tính dễ dàng hơn, hiệu quả hơn"},
+        {q: "Hệ điều hành là:", a: "Cả 3 đáp án đều đúng"},
+        {q: "Tính chất nào không phải tính chất chung của hệ điều hành?", a: "Tính ổn định"},
+        {q: "Hệ điều hành là hệ thống chương trình bao trùm lên máy tính vật lí tạo ra máy logic với những tài nguyên và khả năng mới” là cách nhìn của:", a: "Nhà kĩ thuật"},
+        {q: "Công cụ điều độ cấp thấp được cài đặt ngay vào trong tiến trình được điều độ?", a: "Đúng"},
+        {q: "Tiến trình tồn tại ở mấy trạng thái chính?", a: "3"},
+        {q: "Trong phương pháp kiểm tra và xác lập, IBM PC sử dụng nhóm lệnh BTS (Binary Test and Set) đúng hay sai?", a: "Đúng"},
+        {q: "Công cụ điều độ cấp cao nằm ngoài tiến trình được điều độ, do hệ thống đảm nhiệm?", a: "Đúng"},
+        {q: "Tiến trình là gì (Process)?", a: "Chương trình đang thực hiện"},
+        {q: "Trong kĩ thuật đèn báo (Semaphore), ban đầu biến nguyên S được khởi tạo bằng?", a: "Khả năng phục vụ của tài nguyên găng"},
+        {q: "Điều kiện nào không có trong các điều kiện xảy ra bế tắc?", a: "Phân phối lại tài nguyên"},
+        {q: "Có mấy lớp giải thuật điều độ cấp thấp?", a: "3"},
+        {q: "Giải thuật “Người chủ ngân hàng” thuộc lớp giải thuật chống bế tắc nào sau đây?", a: "Dự báo và tránh"},
+        {q: "Trong lớp giải thuật phòng ngừa, để chống tài nguyên găng ta có thể:", a: "Tất cả các đáp án đều đúng"},
+        {q: "Điều phối FIFO có nghĩa là?", a: "Vào trước ra trước"},
+        {q: "Điều phối SJF là điều phối?", a: "Có thời gian chờ trung bình đạt min"},
+        {q: "Đâu là đặc điểm của thuật giải RR (Round Robin)?", a: "Mọi tiến trình đều kết thúc được"},
+        {q: "Trong xử lý ngắt của IBM PC, ngắt kiểm tra chương trình là?", a: "INT 20"},
+        {q: "Trong máy IBM 360/370 có bao nhiêu loại sự kiện?", a: "7"},
+        {q: "Cơ chế “sự kiện và ngắt” được áp dụng cho các máy tính từ thế hệ thứ mấy?", a: "Thế hệ III"},
+        {q: "Cho bảng thông tin của các tiến trình. Thời gian chờ đợi trung bình theo giải thuật FCFS là?", a: "8.75"},
+        {q: "Trong xử lý ngắt của IBM PC, kích thước một con trỏ ngắt là?", a: "4B"},
+        {q: "Tiến trình yêu cầu một tài nguyên nhưng chưa được đáp ứng... thuộc dạng chuyển trạng thái nào sau đây?", a: "Running-> Blocked"},
+        {q: "Cho bảng thông tin của các tiến trình. Thời gian chờ đợi trung bình theo giải thuật SJF là?", a: "7.75"},
+        {q: "Đâu không phải là đặc điểm của thuật giải SJF (Shortest Job First)?", a: "Dễ dàng dự báo thời điểm phục vụ tiến trình"},
+        {q: "Điều phối SJF có nghĩa là?", a: "Công việc ngắn nhất được xử lý đầu tiên"},
+        {q: "Đâu không phải là đặc điểm của thuật giải FCFS (First Come – First Serve)?", a: "Thời gian chờ trung bình nhỏ"},
+        {q: "Thuật toán nào sau đây là thuật toán có thể điều phối theo nguyên tắc độc quyền?", a: "Tất cả đều đúng"},
+        {q: "Tiến trình song song chỉ tồn tại trong loại hệ điều hành nào?", a: "Đa nhiệm"},
+        {q: "Trong điều phối Round Robin (RR) nếu q quá lớn sẽ dẫn đến?", a: "Giảm khả năng tương tác của hệ thống"},
+        {q: "Nguyên lí phân phối độc quyền thường thích hợp với các hệ xử lí?", a: "Hệ thống xử lí theo lô"},
+        {q: "Quan điểm ưu tiên chọn những tiến trình đã sử dụng CPU ít nhất vì?", a: "Rời khỏi hệ thống sớm nhất"},
+        {q: "Trong xử lý ngắt của IBM PC, ngắt thường trú chương trình là?", a: "INT 27"},
+        {q: "Hệ điều hành nào không có sử dụng dấu cách khi đặt tên file?", a: "MS Dos"},
+        {q: "Phòng đệm vòng tròn có mấy loại phòng đệm?", a: "3"},
+        {q: "Quản lý file theo cấu trúc cây được sử dụng trong hệ điều hành nào?", a: "Unix/Linux"},
+        {q: "Hệ thống quản lý file có nhiệm vụ cung cấp cho người dùng các phương tiện?", a: "Tất cả đáp án đều đúng"},
+        {q: "Phép trao đổi vào/ra của thiết bị ngoại vi dựa trên nguyên lý nào?", a: "Bảng tham số điều khiển"},
+        {q: "Tạo, huỷ, mở, đóng, đọc, ghi … là các tác vụ cần thiết để hệ điều hành?", a: "Quản lí tệp tin"},
+        {q: "Cấu trúc thư mục phân cấp là của hệ thống nào?", a: "UNIX"},
+        {q: "Loại thư mục nào dễ tổ chức và khai thác nhưng gây khó khăn khi đặt tên tập tin không trùng nhau... ?", a: "Thư mục một cấp"},
+        {q: "Đâu là đặc điểm của phòng đệm truy nhập theo địa chỉ?", a: "Không tốn bộ nhớ và thời gian chuyển thông tin trong bộ nhớ"},
+        {q: "Thành phần nào không nằm trong hệ thống quản lý file?", a: "Hệ thống điều khiển ổ đĩa"},
+        {q: "Spool có mấy giai đoạn, ứng với giai đoạn nào?", a: "Khởi tạo, xử lý, kết thúc"},
+        {q: "Quản lý file theo cấu trúc phân cấp được sử dụng trong hệ điều hành nào?", a: "Windows/ MS Dos"},
+        {q: "Cấu trúc thư mục cây là của hệ thống nào?", a: "MS-DOS, IBM-PC"},
+        {q: "Những thiết bị nào sau đây được xếp vào nhóm thiết bị ngoại vi?", a: "Bàn phím, Chuột, Màn hình, Máy in"},
+        {q: "Độ dài tối đa 8 ký tự khi đặt tên file quy định với hệ điều hanh nào?", a: "MS Dos"},
+        {q: "Kích thước một sector thường là bao nhiêu?", a: "512B"},
+        {q: "Kích thước phần tử trong FAT 32?", a: "32b"},
+        {q: "Thiết bị nào sau đây không là thiết bị nhập/xuất tuần tự?", a: "Đĩa"},
+        {q: "Hệ điều hành nào không phải là hệ điều hành đa nhiệm nhiều người dùng?", a: "MS Dos"},
+        {q: "Đâu là đặc điểm của phòng đệm truy nhập theo địa?", a: "Không tốn bộ nhớ và thời gian chuyển thong tin trong bộ nhớ"},
+        {q: "Trong Spool, với mỗi phép trao đổi vào/ra. Hệ thống tạo ra mấy chương trình kênh?", a: "2"},
+        {q: "Unix và Linux là gì?", a: "Hệ điều hành đa nhiệm nhiều người dùng"},
+        {q: "Hệ điều hành nào sau phân biệt chữ thường, hoa đối với tập tin?", a: "MS-DOS, WINDOWS"},
+        {q: "Cấu hình tổ chức hệ thống nhiều processor?", a: "Tất cả các phương án đều đúng"},
+        {q: "Tại một thời điểm, với hệ thống đơn bộ xử lý có thể có tối đa bao nhêu tiến trình ở trạng thái thực hiện?", a: "1"},
+        {q: "Hệ thống đa xử lý đối xứng là?", a: "Mỗi processor chạy độc lập trên một bản sao hệ điều hành như nhau"},
+        {q: "Quan hệ phân cấp chịu trách nhiệm?", a: "Tất cả các phương án đều đúng"},
+        {q: "Quan hệ liên kết linh hoạt?", a: "Processor tổ chức quản lý và thực hiện tiến trình độc lập"},
+        {q: "API (giao diện lập trình ứng dụng) chứa?", a: "Tất cả các phương án đều đúng"},
+        {q: "Nhiệm vụ của Windows API?", a: "Tất cả các phương án đều đúng"},
+        {q: "Hệ điều hành phân tán là?", a: "Là hệ thống tính toán đạt hiệu quả an toàn"},
+        {q: "Cấu trúc hệ điều hành nào tương thích với hệ thống phân tán?", a: "Cấu trúc Server-client"},
+        {q: "Kỹ thuật nào liên lạc trực tiếp giữa hai tiến trình?", a: "Vùng nhớ chia sẻ"},
+        {q: "Kiểu tập tin nào liên quan đến nhập xuất thông qua các thiết bị nhập xuất tuần tự... ?", a: "Tập tin có kí tự đặc biệt"},
+        {q: "Spool có can thiệp vào chương trình người dùng?", a: "Không"},
+        {q: "Phương pháp nhanh nhất để trao đổi thông tin giữa các tiến trình?", a: "Vùng nhớ chia sẻ"},
+        {q: "Với một hệ thống đa chương trình thì bộ nhớ sẽ?", a: "Hệ điều hành và nhiều process"},
+        {q: "Đặc điểm của hệ thống xử lý phân tán?", a: "Tất cả các phương án đều đúng"},
+        {q: "Hệ thống nào dưới đây là hệ thống đa lớp?", a: "WINDOW XP"},
+        {q: "Hệ điều hành thiết kế theo kiểu microkernel có tất cả các đặc trưng sau ngoại trừ?", a: "Giao tiếp giữa client và service provider được thực hiện thông qua cơ chế shared memory"},
+        {q: "Hệ thống nào dưới đây là hệ thống đơn lớp?", a: "MS-DOS"},
+        {q: "Ưu điểm chính của time-sharing system so với multiprogrammed system?", a: "Thời gian đáp ứng (response time) nhỏ hơn"},
+        {q: "Hệ thống đa xử lý có những ưu điểm nào?", a: "Tất cả các phương án đều đúng"}
+    ];
+
+    const container = document.getElementById('quizContainer');
+
+    function render(list) {
+        container.innerHTML = '';
+        list.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'quiz-item';
+            div.innerHTML = `
+                <span class="question">Câu ${index + 1}: ${item.q}</span>
+                <span class="answer">✅ Đáp án: ${item.a}</span>
+            `;
+            container.appendChild(div);
+        });
+        document.getElementById('emptyMsg').style.display = list.length ? 'none' : 'block';
+    }
+
+    function handleSearch() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = osData.filter(i => i.q.toLowerCase().includes(query) || i.a.toLowerCase().includes(query));
+        render(filtered);
+    }
+
+    render(osData);
+</script>
+</body>
+</html>
